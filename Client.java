@@ -4,12 +4,18 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URL;
 
 public class Client {
 
 public static void main(String args[]) throws IOException{
 
-    InetAddress address=InetAddress.getLocalHost();
+	InetAddress address = InetAddress.getByName("heistserver.ddns.net");
+	URL whatismyip = new URL("http://checkip.amazonaws.com");
+	BufferedReader in = new BufferedReader(new InputStreamReader(
+	                whatismyip.openStream()));
+
+	String ip = in.readLine(); //you get the IP as a String
     Socket s1=null;
     String line=null;
     BufferedReader br=null;
@@ -17,7 +23,11 @@ public static void main(String args[]) throws IOException{
     PrintWriter os=null;
 
     try {
-        s1=new Socket(address, 4445); // You can use static final constant PORT_NUM
+   // 	if(address.getHostAddress().equals(ip)){
+    		s1 = new Socket("192.168.1.87",8080);
+   // 	}
+   // 	else
+    //		s1 = new Socket(address,5001); // You can use static final constant PORT_NUM
         br= new BufferedReader(new InputStreamReader(System.in));
         is=new BufferedReader(new InputStreamReader(s1.getInputStream()));
         os= new PrintWriter(s1.getOutputStream());
@@ -57,4 +67,27 @@ public static void main(String args[]) throws IOException{
     }
 
 }
+private static Socket createClientSocket(InetAddress clientName, int port){
+
+    boolean scanning = true;
+    Socket socket = null;
+    int numberOfTry = 0;
+
+    while (scanning && numberOfTry < 10){
+        numberOfTry++;
+        try {
+            socket = new Socket(clientName, port);
+            scanning = false;
+        } catch (IOException e) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+        }
+
+    }
+    return socket;
 }
+}
+
