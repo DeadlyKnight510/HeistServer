@@ -9,7 +9,7 @@ public class SocketThread extends Thread {
     protected Socket socket;	
     public int id=-1;
 	Player p=null;
-    Game game=null;
+	public boolean currGame=false;
 	public SocketThread(Socket clientSocket) {
         this.socket = clientSocket;
     }
@@ -44,10 +44,15 @@ public class SocketThread extends Thread {
 						System.out.println("p is null");
 */					
 					if(line.equals("GET")){
+						if(currGame==false && p!=null && p.getGame()!=null)
+						{
+							currGame=true;
+							out.writeBytes("START|"+p.getGame().getLayout(p)+"\n");
+						}
 						if(p!=null && p.getGame()!=null){
-							out.writeBytes("UPD|"+p.getGame().toString()+"\n");
+							out.writeBytes("UPD|"+p.getGame().toString(p)+"\n");
 							out.flush();
-							System.out.println("UPD|"+p.getGame().toString()+"\n");
+							System.out.println("UPD|"+p.getGame().toString(p)+"\n");
 							continue;
 						} 
 						else

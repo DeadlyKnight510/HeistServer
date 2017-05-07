@@ -1,7 +1,7 @@
 
 public class Game {
 	public Player p1,p2;
-	public int p1X=0,p2X=0,p1Y=0,p2Y=0;
+	public int p1X=0,p2X=500,p1Y=0,p2Y=500;
 	public int hlth1=100,hlth2=100;
 	public Game(Player player1, Player player2){
 		p1 = player1;
@@ -19,7 +19,7 @@ public class Game {
 	public void setP2Y(int x){ p2Y = x; }
 	public void setXY(Player p, int x, int y)
 	{
-		System.out.println("called change xy");
+		System.out.println("called change xy : "+x);
 		if(getPlayerNum(p)==1){
 			setP1X(x); setP1Y(y);
 		}
@@ -33,11 +33,22 @@ public class Game {
 		else
 			return 2;
 	}
+	public String getLayout(Player p){
+		String out = "";
+		if(getPlayerNum(p)==1){
+			out+="XY 0 "+p1X+" "+p1Y;
+			out+="|XY 1 "+p2X+" "+p2Y;
+		} else {
+			out+="XY 0 "+p2X+" "+p2Y;
+			out+="|XY 1 "+p1X+" "+p1Y;
+		}
+		return out;
+	}
 	public String toString(Player p)
 	{
 		//only gives value of other player
 		String out="";
-		if(p.equals(p1)){
+		if(getPlayerNum(p)==1){
 			out+="XY "+p2X+" "+p2Y+"|";
 			out+="HLTH "+hlth2;
 		} else {
