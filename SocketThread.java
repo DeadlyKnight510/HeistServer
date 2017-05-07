@@ -7,11 +7,12 @@ import java.net.Socket;
 
 public class SocketThread extends Thread {
     protected Socket socket;	
-    public int id;
-    public SocketThread(Socket clientSocket) {
+    public int id=-1;
+	Player p=null;
+    Game game=null;
+	public SocketThread(Socket clientSocket) {
         this.socket = clientSocket;
     }
-
     public void run() {
         InputStream inp = null;
         BufferedReader brinp = null;
@@ -20,13 +21,6 @@ public class SocketThread extends Thread {
             inp = socket.getInputStream();
             brinp = new BufferedReader(new InputStreamReader(inp));
             out = new DataOutputStream(socket.getOutputStream());
-            String line = brinp.readLine();
-            while(!line.substring(0, 2).equals("id"))
-            {
-            	line = brinp.readLine();
-            }
-            id = Integer.parseInt(line.substring(2, 10));
-            Server.online.add(id);
         } catch (IOException e) {
             return;
         }
@@ -36,41 +30,82 @@ public class SocketThread extends Thread {
                 line = brinp.readLine();
                 if ((line == null) || line.equalsIgnoreCase("QUIT")) {
                     socket.close();
-                    Server.online.remove(id);
+					System.out.println(id+" has disconnected");
+//                    Server.online.remove(id);
                     return;
-                } else {
-                	
-                	if(line.toLowerCase().trim().equals("PLAY")){
-                		Server.playersearch.add(id);
+                } 
+				else {
+/*					if(p!=null){
+						System.out.println("p is not null");
+						if(p.getGame()==null)
+							System.out.println("p game is also null");
+					}
+					else
+						System.out.println("p is null");
+*/					
+					if(line.equals("GET")){
+						if(p!=null && p.getGame()!=null){
+							out.writeBytes("UPD|"+p.getGame().toString()+"\n");
+							out.flush();
+							System.out.println("UPD|"+p.getGame().toString()+"\n");
+							continue;
+						} 
+						else
+						{
+							out.writeBytes("OK\n");
+							out.flush();
+							continue;
+						}
+					}
+					else if(line.trim().equals("PLAY")){
+						if(p!=null){
+							Manager.playersearch.add(p);
+						}
+					}
+					else{
+						String[] temp = line.split("\\|");
+						for(String m: temp)
+						{
+							String[] parts = m.split(" ");
+							if(parts[0].equals("GTID")){
+								System.out.println("num id"+Player.numPlayers);
+								out.writeBytes(Integer.toString(Player.numPlayers)+"\n");
+								out.flush();
+								Player.addPlayer();
+							}
+							else if(parts[0].equals("ID")){
+								// "ID 7 billy"
+								id = Integer.parseInt(parts[1].trim());
+								System.out.println("Client "+id+" connected");
+								p=new Player(id,parts[2]);
+								Manager.online.add(p);
+								break;
+							}
+							else if(parts[0].equals("XY"))
+							{
+								// "XY 400 100
+								int x=Integer.parseInt(parts[1].trim());
+								int y=Integer.parseInt(parts[2].trim());
+								p.getGame().setXY(p,x,y);
+							}
+							else if(parts[0].equals("HLTH"))
+							{
+								// "HLTH 300"
+								int health=Integer.parseInt(parts[1].trim());
+							}
+							else if(parts[0].equals("BULT"))
+							{
+								// "BULT 1 15 1352"
+								int id = Integer.parseInt(parts[1].trim());
+								int x1 = Integer.parseInt(parts[2].trim());
+								int y1 = Integer.parseInt(parts[3].trim());
+							}
+						}
+						System.out.println(id+": "+line);
+        	            out.writeBytes("OK\n");
+                	    out.flush();
                 	}
-                	
-                	String cmd =line.toLowerCase().substring(0,4);
-                	switch(cmd)
-                	{
-                	case "XY  ":
-                		//each num is 5 numbers long - use 0 as placeholder when smaller
-                		//IE: "XY  00015 01352"
-                		int x = Integer.parseInt(line.substring(4,9));
-                		int y = Integer.parseInt(line.substring(10,15));
-                		break;
-                	case "HLTH":
-                		//IE: "HLTH700"
-                		int h = Integer.parseInt(line.substring(4));
-                		break;
-                	case "BULT":
-                		//IE: "BULT id1 00015 01352"
-                		int id = line.indexOf("id");
-                		int space = line.indexOf(" ",id);
-                		int bltid = Integer.parseInt(line.substring(id+2,space));
-                		String p = line.substring(space).trim();
-                		int space2 = p.indexOf(" ");
-                		int x1 = Integer.parseInt(p.substring(0,space2));
-                		
-                		break;
-                	}
-                    out.writeBytes(line + "\n\r");
-                    out.flush();
-                }
+				}
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
