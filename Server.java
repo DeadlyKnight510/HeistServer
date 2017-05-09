@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class Server {
 
     static final int PORT = 8080;
-	static Manager mgr;
+	public static Manager mgr;
     public static void main(String args[]) {
         mgr = new Manager();
 		mgr.start();

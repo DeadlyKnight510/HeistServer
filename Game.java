@@ -33,7 +33,7 @@ public class Game {
 		else
 			return 2;
 	}
-	public String getLayout(Player p){
+	public synchronized String getLayout(Player p){
 		String out = "";
 		if(getPlayerNum(p)==1){
 			out+="XY 0 "+p1X+" "+p1Y;
@@ -44,7 +44,7 @@ public class Game {
 		}
 		return out;
 	}
-	public String toString(Player p)
+	public synchronized String toString(Player p)
 	{
 		//only gives value of other player
 		String out="";
