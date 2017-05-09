@@ -14,44 +14,17 @@ public class SocketThread extends Thread {
 	public int id=-1;
 	Player p=null;
 	public boolean currGame=false;
-	Timer t;
 	InputStream inp = null;
 	BufferedReader brinp = null;
 	DataOutputStream out = null;
 	public SocketThread(Socket clientSocket) {
 		this.socket = clientSocket;
-		t = new Timer(10, new ActionListener() {// fires off every 10 ms
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				if(p.getGame()!=null){
-					update();
-				}
-			}
-		});
 	}
 	public void update(){
 		try{
 			if(p!=null && p.getGame()!=null){
 				send("UPD|"+p.getGame().toString(p));
-				System.out.println("UPD|"+p.getGame().toString(p)+"\n");
-			} 
-		}catch(Exception e){}
-	}
-	public void get(){
-		try{
-			if(p!=null && p.getGame()!=null){
-				String line = sendWResp("GET");
-				if ((line == null) || line.equalsIgnoreCase("QUIT")) {
-					quit();
-					return;
-				} 
-				String[] temp = line.split("\\|");
-				for(String m: temp)
-				{
-					String[] parts = m.split(" ");
-					actions(parts);
-				}
+//				System.out.println("UPD|"+p.getGame().toString(p)+"\n");
 			} 
 		}catch(Exception e){}
 	}
@@ -65,6 +38,7 @@ public class SocketThread extends Thread {
 			}
 		}catch(Exception e){}
 	}
+	@Override
 	public void run() {
 		try {
 			inp = socket.getInputStream();
@@ -75,8 +49,25 @@ public class SocketThread extends Thread {
 		}
 		String line;
 		while (true) {
+	
+
+				if(!currGame && p!=null && p.getGame()!=null){
+					currGame = true;
+					send("START|"+p.getGame().getLayout(p));
+				} else if(currGame && p!=null && p.getGame() == null) {
+					currGame = false;
+					send("QUIT");
+				}
+				else if(currGame){
+					update();
+				}
+
+
 			line = sendWResp("GET");
-			if ((line == null) || line.equalsIgnoreCase("QUIT")) {
+			if(line==null||line.equals("")){
+				continue;
+			}
+			else if ((line == null) || line.equalsIgnoreCase("END")) {
 				quit();
 				return;
 			} 
@@ -92,7 +83,7 @@ public class SocketThread extends Thread {
 						String[] parts = m.split(" ");
 						actions(parts);
 					}
-					System.out.println(id+": "+line);
+//					System.out.println(id+": "+line);
 				}
 			}
 		}
@@ -127,6 +118,7 @@ public class SocketThread extends Thread {
 	public void send(String in){
 		try{
 			out.writeBytes(in+"\n");
+			System.out.println(id+" sent:"+in);
 			out.flush();
 		}catch (Exception e){}
 	}
@@ -134,7 +126,9 @@ public class SocketThread extends Thread {
 		try{
 			out.writeBytes(in+"\n");
 			out.flush();
-			return brinp.readLine();
+			String rec = brinp.readLine();
+			System.out.println(id+" sent:"+in+"\n"+id+" rec:"+rec);
+			return rec;
 		}catch (Exception e){}
 		return null;
 	}

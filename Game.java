@@ -19,7 +19,6 @@ public class Game {
 	public void setP2Y(int x){ p2Y = x; }
 	public void setXY(Player p, int x, int y)
 	{
-		System.out.println("called change xy : "+x);
 		if(getPlayerNum(p)==1){
 			setP1X(x); setP1Y(y);
 		}
