@@ -27,7 +27,10 @@ public class ServerUDP {
 			}catch(Exception e){continue;}
 			String temp = new String(receivePacket.getData());
 			System.out.println(temp);
-			String out = "OK";
+
+			String out = UDPProcess.process(receivePacket);
+//			String out = "OK";
+
 			InetAddress ipadr = receivePacket.getAddress();
 			int port = receivePacket.getPort();
 			sendData = out.getBytes();
@@ -35,6 +38,8 @@ public class ServerUDP {
 			try{
 				server.send(sendPacket);
 			} catch (Exception e) { continue; };
+			Arrays.fill(receiveData, (byte) 0);
+			Arrays.fill(sendData, (byte) 0);
 		}
 
     }
