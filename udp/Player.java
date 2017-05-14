@@ -1,12 +1,13 @@
 public class Player{
-	public static int numPlayers=0;
 	public int id;
 	public String username;
 	public Game current=null;
 	public Player(int id,String user){
 		this.id = id;
 		username = user;
-		numPlayers++;
+	}
+	public Player(int id){
+		this.id = id;
 	}
 	public void setGame(Game g){
 		current = g;
@@ -21,8 +22,5 @@ public class Player{
 		else{
 			return false;
 		}
-	}
-	public static void addPlayer(){
-		numPlayers++;
 	}
 }

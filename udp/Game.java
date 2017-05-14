@@ -17,8 +17,22 @@ public class Game {
 	public void setP2X(int x){ p2X = x; }
 	public void setP1Y(int x){ p1Y = x; }
 	public void setP2Y(int x){ p2Y = x; }
+	public boolean containsPlayer(Player p){
+		if(p1.equals(p)){
+			return true;
+		}
+		else if(p2.equals(p))
+			return true;
+		else
+			return false;
+	}
+	public void removePlayer(Player p)
+	{
+		
+	}
 	public void setXY(Player p, int x, int y)
 	{
+		System.out.println("called change xy : "+x);
 		if(getPlayerNum(p)==1){
 			setP1X(x); setP1Y(y);
 		}
@@ -42,6 +56,20 @@ public class Game {
 			out+="|XY 1 "+p1X+" "+p1Y;
 		}
 		return out;
+	}
+	public boolean equals(Game g) {
+		if(this.p1.equals(g.p1)&&this.p2.equals(g.p2)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	public void end(){
+		p2X=-1;
+		p1X=-1;
+		p1Y=-1;
+		p2Y=-1;
 	}
 	public synchronized String toString(Player p)
 	{
