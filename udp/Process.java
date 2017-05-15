@@ -1,19 +1,18 @@
 import java.net.DatagramPacket;
 
 public class Process {
-	public static int numClient=0;
-	public static String process(DatagramPacket dp)
+	public static void process(DatagramSocket server, DatagramPacket dp)
 	{
 		String line = new String(dp.getData());
 		//ID 4|XY 500 100|HLTH 100|OBJ 1 15 1352
 		//  --> GET
 		//GTID
 		//	--> 5
-		if(line.toLowerCase().trim().equals("GTID")){
-			return Integer.toString(numClient);
-		}
 		if(line==null||line.equals("")){
-			return "";
+			Communicate.send(server,"",dp.getAddress(),dp.getPort());
+		} else if(line.trim().equals("GTID")){
+			String out = Integer.toString(ServerUDP.newID());
+			Communicate.send(server,out,dp.getAddress(),dp.getPort());
 		} else {
 			String[] temp = line.split("\\|");
 			int id;
@@ -21,8 +20,6 @@ public class Process {
 			{
 				String[] parts = temp[0].split(" ");
 				id = Integer.parseInt(parts[1]);
-				Player p=new Player(id,parts[2]);
-				Manager.online.add(p);
 				for(int c=1;c<parts.length;c++)
 				{
 					String[] temp2 = temp[c].split(" ");
@@ -30,9 +27,8 @@ public class Process {
 				}
 			}
 		}
-		return "";
 	}
-	public static void actions(String[] parts, int id){
+	public static String actions(String[] parts, int id){
 		Player p = Manager.getPlayer(id);
 		if(parts[0].equals("XY")){
 			// "XY 400 100
@@ -63,5 +59,6 @@ public class Process {
 			int x1 = Integer.parseInt(parts[2].trim());
 			int y1 = Integer.parseInt(parts[3].trim());
 		}
+		return "";
 	}
 }

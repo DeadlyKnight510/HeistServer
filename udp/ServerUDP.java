@@ -14,6 +14,29 @@ public class ServerUDP {
 	public static int clientNum=0;
 
 	public static void main(String args[]) {
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable(){
+			public void run(){
+				try{
+						OutputStream output = new FileOutputStream("config.properties");
+						prop.store(output, null);
+				}catch (Exception e){}
+			}
+		}, "Shutdown-thread"));
+		if(!loadProps()){
+			System.out.println("failed to load properties");
+			try{
+				OutputStream output = new FileOutputStream("config.properties");
+				prop.setProperty("id", "0");
+				prop.store(output, null);
+				if (output != null) {
+					try {
+						output.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}catch(Exception e){}
+		}
 		DatagramSocket server = null;
 		try{
 			server = new DatagramSocket(PORT);
@@ -27,8 +50,8 @@ public class ServerUDP {
 			String temp = new String(receivePacket.getData());
 			System.out.println(temp);
 
-			String out = UDPProcess.process(receivePacket);
-			Communicate.send(server, out, receivePacket.getAddress(), receivePacket.getPort());
+			Process.process(server, receivePacket);
+//			Communicate.send(server, out, receivePacket.getAddress(), receivePacket.getPort());
 		}
 	}
 	public static int newID(){ 
@@ -36,7 +59,7 @@ public class ServerUDP {
 		prop.setProperty("id", Integer.toString(currID+1));
 		return currID;
 	}
-	public void loadProps(){
+	public static boolean loadProps(){
 		prop = new Properties();
 		OutputStream output=null;
 		InputStream input=null;
@@ -45,6 +68,7 @@ public class ServerUDP {
 			boolean exists = varTmpDir.exists();
 			if(exists)
 			{
+				System.out.println("properties exists");
 				input = new FileInputStream("config.properties");
 				// load a properties file
 				prop.load(input);
@@ -55,8 +79,9 @@ public class ServerUDP {
 				prop.setProperty("id", "0");
 				prop.store(output, null);
 			}
-		} catch (IOException io) {
+		} catch (Exception io) {
 			io.printStackTrace();
+			return false;
 		} finally {
 			if (output != null) {
 				try {
@@ -66,5 +91,6 @@ public class ServerUDP {
 				}
 			}
 		}
+		return true;
 	}
 }
