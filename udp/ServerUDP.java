@@ -49,7 +49,6 @@ public class ServerUDP {
 			DatagramPacket receivePacket = Communicate.receive(server);
 			String temp = new String(receivePacket.getData());
 			System.out.println(temp);
-
 			Process.process(server, receivePacket);
 //			Communicate.send(server, out, receivePacket.getAddress(), receivePacket.getPort());
 		}
