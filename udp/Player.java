@@ -2,9 +2,14 @@ public class Player{
 	public int id;
 	public String username;
 	public Game current=null;
-	public Player(int id,String user){
+	public InetAddress address;
+	public int port;
+
+	public Player(int id,String user,int address, int po){
 		this.id = id;
 		username = user;
+		this.address = address;
+		this.port = po;
 	}
 	public Player(int id){
 		this.id = id;
@@ -14,6 +19,12 @@ public class Player{
 	}
 	public Game getGame(){
 		return current;
+	}
+	public DatagramPacket getSend(String in){
+		byte[] send = new byte[1024];
+		send = in.getBytes();
+		DatagramPacket sendPacket = new DatagramPacket(send, send.length, address, port);
+		return sendPacket;
 	}
 	public boolean equals(Player p) {
 		if(p.id==this.id){
