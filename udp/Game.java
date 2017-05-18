@@ -3,9 +3,11 @@ public class Game {
 	public Player p1,p2;
 	public int p1X=0,p2X=500,p1Y=0,p2Y=500;
 	public int hlth1=100,hlth2=100;
+	public ArrayList<String> objects; //for now - eventually will be gameobjects
 	public Game(Player player1, Player player2){
 		p1 = player1;
 		p2 = player2;
+		objects = new ArrayList<String>();  //for now - eventually will be gameobjects
 		p1.setGame(this);
 		p2.setGame(this);
 	}

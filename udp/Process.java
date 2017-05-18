@@ -9,7 +9,7 @@ public class Process {
 		//GTID
 		//	--> 5
 		if(line==null||line.equals("")){
-			Communicate.send(server,"",dp.getAddress(),dp.getPort());
+//			Communicate.send(server,"",dp.getAddress(),dp.getPort());
 		} else if(line.trim().equals("GTID")){
 			String out = Integer.toString(ServerUDP.newID());
 			Communicate.send(server,out,dp.getAddress(),dp.getPort());

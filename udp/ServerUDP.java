@@ -22,6 +22,7 @@ public class ServerUDP {
 				}catch (Exception e){}
 			}
 		}, "Shutdown-thread"));
+		
 		if(!loadProps()){
 			System.out.println("failed to load properties");
 			try{

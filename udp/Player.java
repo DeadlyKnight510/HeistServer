@@ -1,3 +1,6 @@
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+
 public class Player{
 	public int id;
 	public String username;
@@ -5,7 +8,7 @@ public class Player{
 	public InetAddress address;
 	public int port;
 
-	public Player(int id,String user,int address, int po){
+	public Player(int id,String user,InetAddress address, int po){
 		this.id = id;
 		username = user;
 		this.address = address;
