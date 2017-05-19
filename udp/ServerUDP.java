@@ -3,16 +3,17 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream
+import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Properties;
 
 public class ServerUDP {
 	static Properties prop;
-	static final int PORT = 8080;
+//	static final int PORT = 8080;
 	public static int clientNum=0;
-
+	public static Communicate c;
+	public static Manager m;
 	public static void main(String args[]) {
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable(){
 			public void run(){
@@ -22,7 +23,8 @@ public class ServerUDP {
 				}catch (Exception e){}
 			}
 		}, "Shutdown-thread"));
-		
+		m = new Manager();
+		m.start();
 		if(!loadProps()){
 			System.out.println("failed to load properties");
 			try{
@@ -38,19 +40,14 @@ public class ServerUDP {
 				}
 			}catch(Exception e){}
 		}
-		DatagramSocket server = null;
-		try{
-			server = new DatagramSocket(PORT);
-			System.out.println("server created");
-		}catch(Exception e){
-			System.out.println("server creation failed");
-			return;
-		}
+//		DatagramSocket server = null;
+		c = new Communicate();
+//			server = new DatagramSocket(PORT);
 		while(true){
-			DatagramPacket receivePacket = Communicate.receive(server);
+			DatagramPacket receivePacket = c.receive();
 			String temp = new String(receivePacket.getData());
 			System.out.println(temp);
-			Process.process(server, receivePacket);
+			Process.process(receivePacket);
 //			Communicate.send(server, out, receivePacket.getAddress(), receivePacket.getPort());
 		}
 	}

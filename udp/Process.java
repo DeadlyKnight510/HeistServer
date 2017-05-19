@@ -1,7 +1,8 @@
 import java.net.DatagramPacket;
-
+import java.net.InetAddress;
+import java.net.DatagramSocket;;
 public class Process {
-	public static void process(DatagramSocket server, DatagramPacket dp)
+	public static void process(DatagramPacket dp)
 	{
 		String line = new String(dp.getData());
 		//ID 4|XY 500 100|HLTH 100|OBJ 1 15 1352
@@ -11,8 +12,8 @@ public class Process {
 		if(line==null||line.equals("")){
 //			Communicate.send(server,"",dp.getAddress(),dp.getPort());
 		} else if(line.trim().equals("GTID")){
-			String out = Integer.toString(ServerUDP.newID());
-			Communicate.send(server,out,dp.getAddress(),dp.getPort());
+			String out = "GTID "+Integer.toString(ServerUDP.newID());
+			ServerUDP.c.send(out,dp.getAddress(),dp.getPort());
 		} else {
 			String[] temp = line.split("\\|");
 			int id;
@@ -23,13 +24,16 @@ public class Process {
 				for(int c=1;c<parts.length;c++)
 				{
 					String[] temp2 = temp[c].split(" ");
-					actions(temp2,id);
+					String resp = actions(temp2,id,dp.getAddress(),dp.getPort());
+					if(resp!=null){
+						ServerUDP.c.send(resp,dp.getAddress(),dp.getPort());
+					}
 				}
 			}
 		}
 	}
-	public static String actions(String[] parts, int id){
-		Player p = Manager.getPlayer(id);
+	public static String actions(String[] parts, int id,InetAddress ad, int port){
+		Player p = ServerUDP.m.getPlayer(id);
 		if(parts[0].equals("XY")){
 			// "XY 400 100
 			int x=Integer.parseInt(parts[1].trim());
@@ -38,20 +42,20 @@ public class Process {
 		} else if(parts[0].equals("HLTH")){
 			// "HLTH 300"
 			int health=Integer.parseInt(parts[1].trim());
-		}else if(parts[0].equals("LOGIN")){
+		}else if(parts[0].trim().equals("LOGIN")){
 			// "LOGIN suryar --> ID 6|LOGIN suryar"
-			Manager.online.add(new Player(id,parts[1]));
-		} else if(parts[0].equals("PLAY")){
-			// "LOGIN suryar --> ID 6|LOGIN suryar|PLAY"
-			Manager.playersearch.add(Manager.getPlayer(id));
-		} else if(parts[0].equals("END")){
+//			ServerUDP.m.online.add(new Player(id,parts[1],ad,port));
+			ServerUDP.m.playerLogOn(id,parts[1],ad,port);
+			System.out.println("New Player added: "+parts[1]+" id: "+id);
+		} else if(parts[0].trim().equals("PLAY")){
+			// "LOGIN suryar --> ID 6|PLAY"
+			ServerUDP.m.playerPlay(id);
+//			ServerUDP.m.playersearch.add(ServerUDP.m.getPlayer(id));
+			System.out.println(ServerUDP.m.getPlayer(id).username+" clicked play");
+		} else if(parts[0].trim().equals("END")){
 			// "END --> ID 4|END"
-			if(Manager.playersearch.contains(new Player(id))){
-				Manager.playersearch.remove(new Player(id));
-			}
-			Manager.removePlayerFromGame(Manager.getPlayer(id));
-			Manager.online.remove(new Player(id));
-
+			System.out.println(ServerUDP.m.getPlayer(id).username+" has logged out");
+			ServerUDP.m.PlayerLogOff(id);
 		} else if(parts[0].equals("OBJ")){
 			// "BULT 1 15 1352"
 			// if x or y is negative, delete object
@@ -59,6 +63,6 @@ public class Process {
 			int x1 = Integer.parseInt(parts[2].trim());
 			int y1 = Integer.parseInt(parts[3].trim());
 		}
-		return "";
+		return null;
 	}
 }

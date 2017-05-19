@@ -1,4 +1,4 @@
-
+import java.util.ArrayList;
 public class Game {
 	public Player p1,p2;
 	public int p1X=0,p2X=500,p1Y=0,p2Y=500;
@@ -72,6 +72,15 @@ public class Game {
 		p1X=-1;
 		p1Y=-1;
 		p2Y=-1;
+	}
+	public boolean send(){
+		try{
+			ServerUDP.c.send(p1.getSend(toString(p1)));
+			ServerUDP.c.send(p2.getSend(toString(p2)));
+		}catch(Exception e){
+			return false;
+		}
+		return true;
 	}
 	public synchronized String toString(Player p)
 	{
