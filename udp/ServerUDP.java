@@ -18,8 +18,10 @@ public class ServerUDP {
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable(){
 			public void run(){
 				try{
-						OutputStream output = new FileOutputStream("config.properties");
-						prop.store(output, null);
+					OutputStream output = new FileOutputStream("config.properties");
+					prop.store(output, null);
+					if(m!=null)
+						m.sendToAll("QUIT");
 				}catch (Exception e){}
 			}
 		}, "Shutdown-thread"));

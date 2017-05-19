@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 public class Manager extends Thread{
-    public static ArrayList<Player> online;
-    public static ArrayList<Player> playersearch;
-    public static ArrayList<Game> ongoingGames;
+    public ArrayList<Player> online;
+    public ArrayList<Player> playersearch;
+    public ArrayList<Game> ongoingGames;
     public Manager(){
         online = new ArrayList<Player>();
         playersearch = new ArrayList<Player>();
@@ -24,10 +24,10 @@ public class Manager extends Thread{
 			}
         }
     }
-    public static int getNumOnline(){
+    public int getNumOnline(){
         return online.size();
     }
-    public static int getNumSearching(){
+    public int getNumSearching(){
         return playersearch.size();
     }
 	public boolean sendToAll(String in){
@@ -40,7 +40,7 @@ public class Manager extends Thread{
 		}
 		return true;
 	}
-    public static Game containsPlayer(Player p){
+    public Game containsPlayer(Player p){
         for(Game g : ongoingGames){
             if(g.containsPlayer(p)){
                 return g;
@@ -48,7 +48,7 @@ public class Manager extends Thread{
         }
         return null;
     }
-    public static boolean removePlayerFromGame(Player p){
+    public boolean removePlayerFromGame(Player p){
         Game g = containsPlayer(p);
         if(g==null)
             return false;
@@ -59,14 +59,14 @@ public class Manager extends Thread{
         }
     }
     //Get player that is not the one inputted
-    public static Player getPlayerNot(Player not){
+    public Player getPlayerNot(Player not){
         for(Player g:playersearch){
             if(!g.equals(not))
                 return g;
         }
         return null;
     }
-    public static Player getPlayer(int i){
+    public Player getPlayer(int i){
         for(Player g:online){
             if(g.id==i)
                 return g;
@@ -74,28 +74,51 @@ public class Manager extends Thread{
         return null;
     }
     //Get player at ID
-    public static Player getPlayerSearching(int i){
+    public Player getPlayerSearching(int i){
         for(Player g:playersearch){
             if(g.id==i)
                 return g;
         }
         return null;
     }
-    public static Player getPlayer(){
+    public boolean deletePlayerOnline(int id){
+        for(int x=0;x<online.size;x++){
+            if(online.get(x).id==id){
+                online.remove(x);
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean deletPlayerSeach(int id){
+        for(int x=0;x<playersearch.size;x++){
+            if(playersearch.get(x).id==id){
+                playersearch.remove(x);
+                return true;
+            }
+        }
+        return false;
+    }
+    public Player getPlayer(){
         int r = (int)Math.random()*getNumSearching();
         return playersearch.get(r);
     }
 	public void playerLogOff(int id){
-		if(playersearch.contains(new Player(id))){
-			playersearch.remove(new Player(id));
+		if(getPlayer(id)!=null){
+			deletePlayerSeach(id);
+            removePlayerFromGame(getPlayer(id));
+            deletePlayerOnline(id);
+            return;
 		}
-		removePlayerFromGame(getPlayer(id));
-		online.remove(new Player(id));
+        System.out.println("ID "+id+" is not a player");
 	}
 	public void playerPlay(int id){
-		ServerUDP.m.playersearch.add(ServerUDP.m.getPlayer(id));
+		playersearch.add(getPlayer(id));
 	}
-	public void playerLogOn(int id,int name, InetAddress ip, int port){
+	public boolean playerLogOn(int id,int name, InetAddress ip, int port){
+        if(id<0 || name==null || ip==null || port<0)
+            return false;
 		online.add(new Player(id,parts[1],ad,port));
+        return true;
 	}
 }
