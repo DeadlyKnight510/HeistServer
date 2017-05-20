@@ -55,7 +55,7 @@ public class Process {
 		} else if(parts[0].trim().equals("END")){
 			// "END --> ID 4|END"
 			System.out.println(ServerUDP.m.getPlayer(id).username+" has logged out");
-			ServerUDP.m.PlayerLogOff(id);
+			ServerUDP.m.playerLogOff(id);
 		} else if(parts[0].equals("OBJ")){
 			// "BULT 1 15 1352"
 			// if x or y is negative, delete object

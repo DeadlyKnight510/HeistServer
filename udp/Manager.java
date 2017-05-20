@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.net.InetAddress;
 public class Manager extends Thread{
     public ArrayList<Player> online;
     public ArrayList<Player> playersearch;
@@ -14,13 +15,15 @@ public class Manager extends Thread{
             {
                 Player first = getPlayer();
                 Player second = getPlayerNot(first);
-                ongoingGames.add(new Game(first,second));
+				Game tempGame = new Game(first,second);
+				tempGame.start();
+                ongoingGames.add(tempGame);
                 playersearch.remove(first);
                 playersearch.remove(second);
                 System.out.println("New Game Started Between "+first.username+" and "+second.username);
             }
 			for(Game g: ongoingGames){
-				g.send();	
+				g.update();	
 			}
         }
     }
@@ -82,7 +85,7 @@ public class Manager extends Thread{
         return null;
     }
     public boolean deletePlayerOnline(int id){
-        for(int x=0;x<online.size;x++){
+        for(int x=0;x<online.size();x++){
             if(online.get(x).id==id){
                 online.remove(x);
                 return true;
@@ -90,8 +93,8 @@ public class Manager extends Thread{
         }
         return false;
     }
-    public boolean deletPlayerSeach(int id){
-        for(int x=0;x<playersearch.size;x++){
+    public boolean deletePlayerSeach(int id){
+        for(int x=0;x<playersearch.size();x++){
             if(playersearch.get(x).id==id){
                 playersearch.remove(x);
                 return true;
@@ -115,10 +118,10 @@ public class Manager extends Thread{
 	public void playerPlay(int id){
 		playersearch.add(getPlayer(id));
 	}
-	public boolean playerLogOn(int id,int name, InetAddress ip, int port){
-        if(id<0 || name==null || ip==null || port<0)
+	public boolean playerLogOn(int id, String name, InetAddress ad, int port){
+        if(id<0 || name==null || ad==null || port<0)
             return false;
-		online.add(new Player(id,parts[1],ad,port));
+		online.add(new Player(id,name,ad,port));
         return true;
 	}
 }

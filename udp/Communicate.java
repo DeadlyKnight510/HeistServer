@@ -16,6 +16,7 @@ public class Communicate {
 	public boolean send(DatagramPacket dp){
 		try{
 			server.send(dp);
+			System.out.println("send: ip "+dp.getAddress()+" port "+dp.getPort()+" : "+new String(dp.getData()));
 		}catch(Exception e){
 			return false;
 		}

@@ -48,8 +48,8 @@ public class Game {
 		else
 			return 2;
 	}
-	public synchronized String getLayout(Player p){
-		String out = "";
+	public String getLayout(Player p){
+		String out = "START|";
 		if(getPlayerNum(p)==1){
 			out+="XY 0 "+p1X+" "+p1Y;
 			out+="|XY 1 "+p2X+" "+p2Y;
@@ -73,7 +73,18 @@ public class Game {
 		p1Y=-1;
 		p2Y=-1;
 	}
-	public boolean send(){
+	public boolean start(){
+		try{
+			ServerUDP.c.send(p1.getSend(getLayout(p1)));
+			ServerUDP.c.send(p2.getSend(getLayout(p2)));
+		}catch(Exception e){
+			System.out.println("failed");
+			return false;
+		}
+		System.out.println("worked");
+		return true;
+	}
+	public boolean update(){
 		try{
 			ServerUDP.c.send(p1.getSend(toString(p1)));
 			ServerUDP.c.send(p2.getSend(toString(p2)));
@@ -82,10 +93,10 @@ public class Game {
 		}
 		return true;
 	}
-	public synchronized String toString(Player p)
+	public String toString(Player p)
 	{
 		//only gives value of other player
-		String out="";
+		String out="UPD|";
 		if(getPlayerNum(p)==1){
 			out+="XY "+p2X+" "+p2Y+"|";
 			out+="HLTH "+hlth2;
