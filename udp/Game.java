@@ -1,8 +1,16 @@
 import java.util.ArrayList;
 public class Game {
 	public Player p1,p2;
-	public int p1X=0,p2X=500,p1Y=0,p2Y=500;
-	public int hlth1=100,hlth2=100;
+	// public int p1X=0,p2X=500,p1Y=0,p2Y=500;
+	// public int[] p1X=new int[]{0,0},p2X=500,p1Y=0,p2Y=500;
+	// public int old_p1X=0,old_p2X=500,old_p1Y=0,old_p2Y=500;
+	// public int hlth1=100,hlth2=100;
+	// public int old_hlth1=100,old_hlth2=100;
+
+	public int[] hlth1=new int[]{100,-1},hlth2=new int[]{100,-1};
+	//first value is current, second is the last value to be sent
+	public int[] p1X=new int[]{0,-1},p2X=new int[]{500,-1},p1Y=new int[]{0,-1},p2Y=new int[]{500,-1};
+
 	public ArrayList<String> objects; //for now - eventually will be gameobjects
 	public Game(Player player1, Player player2){
 		p1 = player1;
@@ -11,14 +19,14 @@ public class Game {
 		p1.setGame(this);
 		p2.setGame(this);
 	}
-	public int getP1X(){ return p1X; }
-	public int getP2X(){ return p2X; }
-	public int getP2Y(){ return p2Y; }
-	public int getP1Y(){ return p1Y; }
-	public void setP1X(int x){ p1X = x; }
-	public void setP2X(int x){ p2X = x; }
-	public void setP1Y(int x){ p1Y = x; }
-	public void setP2Y(int x){ p2Y = x; }
+	public int getP1X(){ return p1X[0]; }
+	public int getP2X(){ return p2X[0]; }
+	public int getP2Y(){ return p2Y[0]; }
+	public int getP1Y(){ return p1Y[0]; }
+	public void setP1X(int x){ p1X[0] = x; }
+	public void setP2X(int x){ p2X[0] = x; }
+	public void setP1Y(int x){ p1Y[0] = x; }
+	public void setP2Y(int x){ p2Y[0] = x; }
 	public boolean containsPlayer(Player p){
 		if(p1.equals(p)){
 			return true;
@@ -51,11 +59,11 @@ public class Game {
 	public String getLayout(Player p){
 		String out = "START|";
 		if(getPlayerNum(p)==1){
-			out+="XY 0 "+p1X+" "+p1Y;
-			out+="|XY 1 "+p2X+" "+p2Y;
+			out+="XY 0 "+p1X[0]+" "+p1Y[0];
+			out+="|XY 1 "+p2X[0]+" "+p2Y[0];
 		} else {
-			out+="XY 0 "+p2X+" "+p2Y;
-			out+="|XY 1 "+p1X+" "+p1Y;
+			out+="XY 0 "+p2X[0]+" "+p2Y[0];
+			out+="|XY 1 "+p1X[0]+" "+p1Y[0];
 		}
 		return out;
 	}
@@ -68,26 +76,34 @@ public class Game {
 		}
 	}
 	public void end(){
-		p2X=-1;
-		p1X=-1;
-		p1Y=-1;
-		p2Y=-1;
+		p2X[0]=-1;
+		p1X[0]=-1;
+		p1Y[0]=-1;
+		p2Y[0]=-1;
 	}
 	public boolean start(){
 		try{
 			ServerUDP.c.send(p1.getSend(getLayout(p1)));
 			ServerUDP.c.send(p2.getSend(getLayout(p2)));
 		}catch(Exception e){
-			System.out.println("failed");
 			return false;
 		}
-		System.out.println("worked");
 		return true;
 	}
 	public boolean update(){
 		try{
-			ServerUDP.c.send(p1.getSend(toString(p1)));
-			ServerUDP.c.send(p2.getSend(toString(p2)));
+			if(isChanged(p1)){
+				ServerUDP.c.send(p1.getSend(toString(p1)));
+				p2X[1]=p2X[0];
+				p2Y[1]=p2Y[0];
+				hlth2[1]=hlth2[0];
+			}
+			if(isChanged(p2)){
+				ServerUDP.c.send(p2.getSend(toString(p2)));
+				p1X[1]=p1X[0];
+				p1Y[1]=p1Y[0];
+				hlth1[1]=hlth1[0];
+			}
 		}catch(Exception e){
 			return false;
 		}
@@ -98,12 +114,30 @@ public class Game {
 		//only gives value of other player
 		String out="UPD|";
 		if(getPlayerNum(p)==1){
-			out+="XY "+p2X+" "+p2Y+"|";
-			out+="HLTH "+hlth2;
+			out+="XY "+p2X[0]+" "+p2Y[0]+"|";
+			out+="HLTH "+hlth2[0];
 		} else {
-			out+="XY "+p1X+" "+p1Y+"|";
-			out+="HLTH "+hlth1;
+			out+="XY "+p1X[0]+" "+p1Y[0]+"|";
+			out+="HLTH "+hlth1[0];
 		}
 		return out;
+	}
+	public boolean isChanged(Player p){
+		if(getPlayerNum(p)==1){
+			if(p2X[0]!=p2X[1])
+				return true;
+			if(p2Y[0]!=p2Y[1])
+				return true;
+			if(hlth2[0]!=hlth2[1])
+				return true;
+		} else {
+			if(p1X[0]!=p1X[1])
+				return true;
+			if(p1Y[0]!=p1Y[1])
+				return true;
+			if(hlth1[0]!=hlth1[1])
+				return true;
+		}
+		return false;
 	}
 }
