@@ -38,7 +38,8 @@ public class Process {
 			// "XY 400 100
 			int x=Integer.parseInt(parts[1].trim());
 			int y=Integer.parseInt(parts[2].trim());
-			p.getGame().setXY(p,x,y);
+			double a = Double.parseDouble(parts[3].trim());
+			p.getGame().setXYA(p,x,y,a);
 		} else if(parts[0].equals("HLTH")){
 			// "HLTH 300"
 			int health=Integer.parseInt(parts[1].trim());
@@ -62,6 +63,9 @@ public class Process {
 			int idObj = Integer.parseInt(parts[1].trim());
 			int x1 = Integer.parseInt(parts[2].trim());
 			int y1 = Integer.parseInt(parts[3].trim());
+			double a1 = Double.parseDouble(parts[4].trim());
+			if(p.getGame()!=null)
+				p.getGame().addGO(p,idObj,x1,y1,a1); 
 		}
 		return null;
 	}
