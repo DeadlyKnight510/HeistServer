@@ -1,13 +1,16 @@
 import java.util.ArrayList;
 import java.net.InetAddress;
+import java.util.List;
+import java.util.Collections;
+import java.util.Iterator;
 public class Manager extends Thread{
-    public ArrayList<Player> online;
-    public ArrayList<Player> playersearch;
-    public ArrayList<Game> ongoingGames;
+    public static List<Player> online;
+    public static List<Player> playersearch;
+    public static List<Game> ongoingGames;
     public Manager(){
-        online = new ArrayList<Player>();
-        playersearch = new ArrayList<Player>();
-        ongoingGames = new ArrayList<Game>();
+        online = Collections.synchronizedList(new ArrayList<Player>());
+        playersearch = Collections.synchronizedList(new ArrayList<Player>());
+        ongoingGames = Collections.synchronizedList(new ArrayList<Game>());
     }
     public void run(){
         while(true){
@@ -22,17 +25,45 @@ public class Manager extends Thread{
                 playersearch.remove(second);
                 System.out.println("New Game Started Between "+first.username+" and "+second.username);
             }
-			for(Game g: ongoingGames){
-				g.update();	
+			synchronized(ongoingGames) {
+       			Iterator<Game> iterator = ongoingGames.iterator(); 
+				while (iterator.hasNext()){
+					iterator.next().update();	
+				}
 			}
+//			for(Game g: ongoingGames){
+//				g.update();	
+//			}
         }
     }
+	public String toString(Player p){
+		String out = "ONLINEPLAYERS";
+		synchronized(online) {
+			Iterator<Player> iterator = online.iterator(); 
+			while (iterator.hasNext()){
+				Player temp = iterator.next();
+				if(temp.id!=p.id)
+					out+="|"+temp.username;	
+			}
+		}
+		return out;
+	}
     public int getNumOnline(){
         return online.size();
     }
     public int getNumSearching(){
         return playersearch.size();
     }
+	public boolean updatePlayers(){
+		try{
+			for(Player p : online){
+				ServerUDP.c.send(p.getSend(toString(p)));	
+			}
+		}catch(Exception e){
+			return false;
+		}
+		return true;
+	}
 	public boolean sendToAll(String in){
 		try{
 			for(Player p : online){
@@ -52,6 +83,16 @@ public class Manager extends Thread{
         return null;
     }
     public boolean removePlayerFromGame(Player p){
+        Game g = containsPlayer(p);
+        if(g==null)
+            return false;
+        else{
+            g.end();
+            ongoingGames.remove(g);
+            return true;
+        }
+    }
+    public boolean endGame(Player p){
         Game g = containsPlayer(p);
         if(g==null)
             return false;
@@ -111,17 +152,20 @@ public class Manager extends Thread{
 			deletePlayerSeach(id);
             removePlayerFromGame(getPlayer(id));
             deletePlayerOnline(id);
+			updatePlayers();
             return;
 		}
         System.out.println("ID "+id+" is not a player");
 	}
 	public void playerPlay(int id){
-		playersearch.add(getPlayer(id));
+		if(getPlayerSearching(id)==null)
+			playersearch.add(getPlayer(id));
 	}
 	public boolean playerLogOn(int id, String name, InetAddress ad, int port){
         if(id<0 || name==null || ad==null || port<0)
             return false;
 		online.add(new Player(id,name,ad,port));
+		updatePlayers();
         return true;
 	}
 }

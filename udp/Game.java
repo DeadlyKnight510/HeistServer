@@ -92,10 +92,14 @@ public class Game {
 		}
 	}
 	public void end(){
-		p2X[0]=-1;
-		p1X[0]=-1;
-		p1Y[0]=-1;
-		p2Y[0]=-1;
+		ServerUDP.c.send(p1.getSend("DONE"));
+		ServerUDP.c.send(p2.getSend("DONE"));
+	}
+	public void kill(Player p){
+		if(getPlayerNum(p)==1)
+			ServerUDP.c.send(p2.getSend("UPD|KILL"));
+		else
+			ServerUDP.c.send(p1.getSend("UPD|KILL"));
 	}
 	public boolean start(){
 		try{
