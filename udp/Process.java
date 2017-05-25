@@ -52,7 +52,6 @@ public class Process {
 			// "LOGIN suryar --> ID 6|PLAY"
 			ServerUDP.m.playerPlay(id);
 //			ServerUDP.m.playersearch.add(ServerUDP.m.getPlayer(id));
-			System.out.println(ServerUDP.m.getPlayer(id).username+" clicked play");
 		} else if(parts[0].trim().equals("END")){
 			// "END --> ID 4|END"
 //			System.out.println(ServerUDP.m.getPlayer(id).username+" has logged out");

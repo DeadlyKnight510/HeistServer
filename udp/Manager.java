@@ -158,8 +158,10 @@ public class Manager extends Thread{
         System.out.println("ID "+id+" is not a player");
 	}
 	public void playerPlay(int id){
-		if(getPlayerSearching(id)==null)
+		if(getPlayerSearching(id)==null){
 			playersearch.add(getPlayer(id));
+			System.out.println(getPlayer(id).username+" clicked play");
+		}
 	}
 	public boolean playerLogOn(int id, String name, InetAddress ad, int port){
         if(id<0 || name==null || ad==null || port<0)
