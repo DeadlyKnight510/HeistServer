@@ -56,7 +56,9 @@ public class Process {
 			// "END --> ID 4|END"
 //			System.out.println(ServerUDP.m.getPlayer(id).username+" has logged out");
 			ServerUDP.m.playerLogOff(id);
-		} else if(parts[0].trim().equals("KILL")){
+		} else if(parts[0].trim().equals("CANCEL")){
+			ServerUDP.m.removePlayerFromSearch(id);
+		}else if(parts[0].trim().equals("KILL")){
 			System.out.println("killed");
 			p.getGame().kill(p);
 			ServerUDP.m.endGame(p);

@@ -36,6 +36,21 @@ public class Manager extends Thread{
 //			}
         }
     }
+    public void removePlayerFromSearch(int id){
+        Player p = getPlayerSearching(id);
+        if(p==null)
+            return;
+        synchronized(playersearch) {
+            Iterator<Player> iterator = playersearch.iterator(); 
+            while (iterator.hasNext()){
+                Player temp = iterator.next();
+                if(temp.id==id){
+                    playersearch.remove(temp);
+                    return;
+                }
+            }
+        }
+    }
 	public String toString(Player p){
 		String out = "ONLINEPLAYERS";
 		synchronized(online) {
