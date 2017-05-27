@@ -12,8 +12,12 @@ public class Game {
 	public Game(String n){
 		team1 = new ArrayList<Player>();
 		team2 = new ArrayList<Player>();
+		/*
 		team1.add(new Player(8,"me"));
+		team2.add(new Player(11,"why"));
+		team1.add(new Player(17,"no"));
 		team2.add(new Player(9,"you"));
+		*/
 		gos = new ArrayList<GameObject>();
 		name=n;
 		System.out.println("new game created");
@@ -29,12 +33,13 @@ public class Game {
 	}
 	public String getPlayers(){
 		String out="GTPERS|"+gameid;
-		for(Player p1:team1){
-			out+="|"+p1.id+","+p1.username;
+		for(Player p1:team2){
+			out+="|"+p1.id+","+p1.username.substring(0,4);
 		}
-		for(Player p2:team2){
-			out+="|"+p2.id+","+p2.username;
+		for(Player p2:team1){
+			out+="|"+p2.id+","+p2.username.substring(0,4);
 		}
+		System.out.println("generated "+out);
 		return out;
 	}
 	public void addPlayer(Player p){
@@ -65,15 +70,22 @@ public class Game {
 	}
 	public void removePlayer(Player p)
 	{
-		if(!containsPlayer(p))
-			return;
-		if(containsPlayerInTwo(p)){
-			team1.remove(p);
-		} else {
-			team2.remove(p);
+		for(Player temp1:team1){
+			if(temp1.equals(p)){
+				team1.remove(p);
+				p.setGame(null);
+				sendToAll(getPlayers());
+				return;
+			}
 		}
-		p.setGame(null);
-		sendToAll(getPlayers());
+		for(Player temp2:team2){
+			if(temp2.equals(p)){
+				team2.remove(p);
+				p.setGame(null);
+				sendToAll(getPlayers());
+				return;
+			}
+		}
 	}
 	public void setXYA(Player p, int x, int y, double a, int h)
 	{
@@ -92,17 +104,32 @@ public class Game {
 	}
 	public boolean start(){
 		try{
+			setPlayers();
 			sendToAll(toString("START"));
 		}catch(Exception e){
 			return false;
 		}
 		return true;
 	}
+	public void setPlayers(){
+		for(Player p1:team1){
+			p1.setXYAH(1500,200,0.0,100);
+		}
+		for(Player p2:team2){
+			p2.setXYAH(2000,200,0.0,100);
+		}
+	}
 	public boolean update(){
 		if(gameStart){
 			if(isChanged()){
 				sendToAll(toString("UPD"));
 				gos.clear();
+				for(Player p1:team1){
+					p1.reset();
+				}
+				for(Player p2:team2){
+					p2.reset();
+				}
 			}
 		}
 		return true;
@@ -112,7 +139,7 @@ public class Game {
 			if(p1.isChanged())
 				return true;
 		}
-		for(Player p2:team1){
+		for(Player p2:team2){
 			if(p2.isChanged())
 				return true;
 		}
@@ -137,7 +164,7 @@ public class Game {
 		for(Player p1:team1){
 			ServerUDP.c.send(p1.getSend(in));
 		}
-		for(Player p2:team1){
+		for(Player p2:team2){
 			ServerUDP.c.send(p2.getSend(in));
 		}
 	}

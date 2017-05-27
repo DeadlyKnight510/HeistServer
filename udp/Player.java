@@ -26,6 +26,12 @@ public class Player{
 	public Player(int id){
 		this.id = id;
 	}
+	public void reset(){
+		x[1]=x[0];
+		y[1]=y[0];
+		a[1]=a[0];
+		health[1]=health[0];
+	}
 	public void setGame(Game g){
 		current = g;
 	}
