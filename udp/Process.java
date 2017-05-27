@@ -23,24 +23,38 @@ public class Process {
 				id = Integer.parseInt(parts[1]);
 				for(int c=1;c<parts.length;c++)
 				{
-					String[] temp2 = temp[c].split(" ");
-					String resp = actions(temp2,id,dp.getAddress(),dp.getPort());
-					if(resp!=null){
-						ServerUDP.c.send(resp,dp.getAddress(),dp.getPort());
-					}
+					actions(temp[c],id,dp.getAddress(),dp.getPort());
 				}
 			}
 		}
 	}
-	public static String actions(String[] parts, int id,InetAddress ad, int port){
+	public static void actions(String temp, int id,InetAddress ad, int port){
+		String[] parts = temp.split(" ");
 		Player p = ServerUDP.m.getPlayer(id);
 		if(parts[0].equals("XY")){
 			// "XY 400 100
 			int x=Integer.parseInt(parts[1].trim());
 			int y=Integer.parseInt(parts[2].trim());
 			double a = Double.parseDouble(parts[3].trim());
-			p.getGame().setXYA(p,x,y,a);
-		} else if(parts[0].equals("HLTH")){
+			int h=Integer.parseInt(parts[4].trim());
+			p.setXYAH(x,y,a,h);
+		} else if(parts[0].trim().equals("ADD")){
+			String[] temp2 = temp.split(",");
+			// "HLTH 300"
+			Game g = ServerUDP.m.createGame(temp2[1].trim());
+			ServerUDP.c.send(p.getSend("NEWGAMEID|"+g.gameid));
+		} else if(parts[0].trim().equals("REMOVE")){
+			// "HLTH 300"
+			ServerUDP.m.removeGame(Integer.parseInt(parts[1].trim()));
+		} else if(parts[0].trim().equals("GTPERS")){
+			// "HLTH 300"
+			String send = ServerUDP.m.getPlayersFromGame(Integer.parseInt(parts[1].trim()));
+			if(send!=null)
+				ServerUDP.c.send(p.getSend(send));
+		} else if(parts[0].trim().equals("STARTGM")){
+			// "HLTH 300"
+			ServerUDP.m.startGame(Integer.parseInt(parts[1].trim()));
+		} else if(parts[0].trim().equals("HLTH")){
 			// "HLTH 300"
 			int health=Integer.parseInt(parts[1].trim());
 		}else if(parts[0].trim().equals("LOGIN")){
@@ -48,16 +62,17 @@ public class Process {
 //			ServerUDP.m.online.add(new Player(id,parts[1],ad,port));
 			ServerUDP.m.playerLogOn(id,parts[1],ad,port);
 			System.out.println("New Player added: "+parts[1]+" id: "+id);
-		} else if(parts[0].trim().equals("PLAY")){
-			// "LOGIN suryar --> ID 6|PLAY"
-			ServerUDP.m.playerPlay(id);
-//			ServerUDP.m.playersearch.add(ServerUDP.m.getPlayer(id));
+		} else if(parts[0].trim().contains("PLAY")){
+			String[] temp2 = temp.split(",");
+			// "ID 6|PLAY,[game name],[game id]"
+			// "ID 6|PLAY,bobs burgers,7"
+			ServerUDP.m.playerPlay(id,Integer.parseInt(temp2[2].trim()));
 		} else if(parts[0].trim().equals("END")){
 			// "END --> ID 4|END"
-//			System.out.println(ServerUDP.m.getPlayer(id).username+" has logged out");
 			ServerUDP.m.playerLogOff(id);
-		} else if(parts[0].trim().equals("CANCEL")){
-			ServerUDP.m.removePlayerFromSearch(id);
+		} else if(parts[0].trim().contains("CANCEL")){
+			String[] temp2 = temp.split(",");
+			ServerUDP.m.playerCancel(id,Integer.parseInt(temp2[2].trim()));
 		}else if(parts[0].trim().equals("KILL")){
 			System.out.println("killed");
 			p.getGame().kill(p);
@@ -72,6 +87,5 @@ public class Process {
 			if(p.getGame()!=null)
 				p.getGame().addGO(p,idObj,x1,y1,a1); 
 		}
-		return null;
 	}
 }
