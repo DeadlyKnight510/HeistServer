@@ -61,7 +61,8 @@ public class Manager extends Thread{
 			Iterator<Game> iterator = ongoingGames.iterator(); 
 			while (iterator.hasNext()){
 				Game temp = iterator.next();
-				out+="|"+temp.name;	
+				int t = (temp.gameStart)?1:0;
+				out+="|"+temp.name+","+temp.gameid+","+t;	
 			}
 		}
 		return out;

@@ -20,12 +20,13 @@ public class Game {
 		*/
 		gos = new ArrayList<GameObject>();
 		name=n;
-		System.out.println("new game created");
 		gameid=numgames;
 		numgames++;
+		System.out.println("new game created id "+gameid);
 	}
 	public void startGame(){
 		gameStart=true;
+		ServerUDP.m.updateGames();
 	}
 	public void addGO(Player p, int id, int x, int y, double a){
 		GameObject temp = new GameObject(p.id,id,x,y,a);
