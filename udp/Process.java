@@ -57,6 +57,10 @@ public class Process {
 		} else if(parts[0].trim().equals("HLTH")){
 			// "HLTH 300"
 			int health=Integer.parseInt(parts[1].trim());
+		}else if(parts[0].trim().equals("HIT")){
+			// "HLTH 300"
+			int getid=Integer.parseInt(parts[1].trim());
+			ServerUDP.m.getPlayer(getid).decreaseHLT();
 		}else if(parts[0].trim().equals("LOGIN")){
 			// "LOGIN suryar --> ID 6|LOGIN suryar"
 //			ServerUDP.m.online.add(new Player(id,parts[1],ad,port));

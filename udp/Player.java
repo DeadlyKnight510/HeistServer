@@ -67,6 +67,9 @@ public class Player{
 			return false;
 		}
 	}
+	public void decreaseHLT(){
+		setHealth(getHealth()-10);
+	}
 	public int getHealth(){ return health[0]; }
 	public int getX(){ return x[0]; }
 	public int getY(){ return y[0]; }

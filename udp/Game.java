@@ -114,10 +114,10 @@ public class Game {
 	}
 	public void setPlayers(){
 		for(Player p1:team1){
-			p1.setXYAH(1500,200,0.0,100);
+			p1.setXYAH(3250,1174,0.0,100);
 		}
 		for(Player p2:team2){
-			p2.setXYAH(2000,200,0.0,100);
+			p2.setXYAH(2300,1900,0.0,100);
 		}
 	}
 	public boolean update(){
@@ -144,6 +144,8 @@ public class Game {
 			if(p2.isChanged())
 				return true;
 		}
+		if(gos.size()>0)
+			return true;
 		return false;
 	}
 	public String toString(String beg)
