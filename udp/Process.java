@@ -57,10 +57,18 @@ public class Process {
 		} else if(parts[0].trim().equals("HLTH")){
 			// "HLTH 300"
 			int health=Integer.parseInt(parts[1].trim());
+		} else if(parts[0].trim().equals("PROG")){
+			// "HLTH 300"
+			int prog=Integer.parseInt(parts[1].trim());
+			ServerUDP.m.containsPlayer(id).progress = prog;
 		}else if(parts[0].trim().equals("HIT")){
 			// "HLTH 300"
 			int getid=Integer.parseInt(parts[1].trim());
-			ServerUDP.m.getPlayer(getid).decreaseHLT();
+			if(parts.length>2){
+					int getDamage=Integer.parseInt(parts[2].trim());
+					ServerUDP.m.getPlayer(getid).decreaseHLT(getDamage);
+			} else 
+				ServerUDP.m.getPlayer(getid).decreaseHLT(5);
 		}else if(parts[0].trim().equals("LOGIN")){
 			// "LOGIN suryar --> ID 6|LOGIN suryar"
 //			ServerUDP.m.online.add(new Player(id,parts[1],ad,port));

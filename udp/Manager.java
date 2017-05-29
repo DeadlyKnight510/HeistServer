@@ -12,23 +12,14 @@ public class Manager extends Thread{
     }
     public void run(){
         while(true){
-/*
-            if(getNumSearching()>=2)
-            {
-                Player first = getPlayer();
-                Player second = getPlayerNot(first);
-				Game tempGame = new Game(first,second);
-				tempGame.start();
-                ongoingGames.add(tempGame);
-                playersearch.remove(first);
-                playersearch.remove(second);
-                System.out.println("New Game Started Between "+first.username+" and "+second.username);
-            }
-*/
 			synchronized(ongoingGames) {
        			Iterator<Game> iterator = ongoingGames.iterator(); 
 				while (iterator.hasNext()){
-					iterator.next().update();	
+					Game g = iterator.next();
+					if(g.gameOver){
+						g.update();	
+						removeGame(g.gameid);
+					}
 				}
 			}
         }
@@ -46,11 +37,13 @@ public class Manager extends Thread{
 		return g;
 	}
 	public void removeGame(int gid){
-		for(int x=0;x<ongoingGames.size();x++){
-			if(ongoingGames.get(x).gameid==gid){
-				ongoingGames.remove(x);
-				updateGames();
-				return;
+		synchronized(ongoingGames){
+			for(int x=0;x<ongoingGames.size();x++){
+				if(ongoingGames.get(x).gameid==gid){
+					ongoingGames.remove(x);
+					updateGames();
+					return;
+				}
 			}
 		}
 		updateGames();
@@ -90,6 +83,15 @@ public class Manager extends Thread{
 		}
 		return true;
 	}
+    public Game containsPlayer(int i){
+		Player p = getPlayer(i);
+        for(Game g : ongoingGames){
+            if(g.containsPlayer(p)){
+                return g;
+            }
+        }
+        return null;
+    }
     public Game containsPlayer(Player p){
         for(Game g : ongoingGames){
             if(g.containsPlayer(p)){

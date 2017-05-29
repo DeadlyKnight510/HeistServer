@@ -8,10 +8,14 @@ public class Game {
 	public int gameid;
 	public static int numgames=0;
 	public boolean gameStart=false;
+	public boolean gameOver=false;
+
+	public int progress=0; //how long player in vault
+	public int maxprog=300;
 
 	public Game(String n){
-		team1 = new ArrayList<Player>();
-		team2 = new ArrayList<Player>();
+		team1 = new ArrayList<Player>(); //	robbers
+		team2 = new ArrayList<Player>(); // guards
 		/*
 		team1.add(new Player(8,"me"));
 		team2.add(new Player(11,"why"));
@@ -35,10 +39,10 @@ public class Game {
 	public String getPlayers(){
 		String out="GTPERS|"+gameid;
 		for(Player p1:team2){
-			out+="|"+p1.id+","+p1.username.substring(0,4);
+			out+="|"+p1.id+","+p1.username.substring(0,6);
 		}
 		for(Player p2:team1){
-			out+="|"+p2.id+","+p2.username.substring(0,4);
+			out+="|"+p2.id+","+p2.username.substring(0,6);
 		}
 		System.out.println("generated "+out);
 		return out;
@@ -106,6 +110,15 @@ public class Game {
 	public boolean start(){
 		try{
 			setPlayers();
+			int size = team1.size();
+			if(size==1)
+				maxprog = 300;
+			else if(size < 3)
+				maxprog = 200;
+			else if(size < 5)
+				maxprog = 100;
+			else if(size >=5)
+				maxprog = 75;
 			sendToAll(toString("START"));
 		}catch(Exception e){
 			return false;
@@ -114,10 +127,10 @@ public class Game {
 	}
 	public void setPlayers(){
 		for(Player p1:team1){
-			p1.setXYAH(3250,1174,0.0,100);
+			p1.setXYAH(2300,1900,0.0,100);
 		}
 		for(Player p2:team2){
-			p2.setXYAH(2300,1900,0.0,100);
+			p2.setXYAH(3250,1174,0.0,100);
 		}
 	}
 	public boolean update(){
@@ -132,6 +145,32 @@ public class Game {
 					p2.reset();
 				}
 			}
+			if(teamhealth()){
+				// DONE [guards won]
+				sendToAll("DONE|2");
+				gameStart=false;
+				gameOver=true;
+			} else if(progress>=300){
+				// DONE [robbers won]
+				sendToAll("DONE|1");
+				gameStart=false;
+				gameOver=true;
+			}
+		}
+		return true;
+	}
+	public boolean shouldEnd(){
+		if(teamhealth())
+			return true;
+		if(/*insert condition for robbers to win*/false){
+			return true;
+		}
+		return false;
+	}
+	public boolean teamhealth(){
+		for(Player p:team1){
+			if(p.getHealth()>0)
+				return false;
 		}
 		return true;
 	}
@@ -158,6 +197,10 @@ public class Game {
 		for(Player p2:team2){
 			out+="|T2 "+p2.toString();
 		}
+		if(beg.trim().equals("START")){
+			out+="|MAXPROG "+maxprog;
+		}
+		out+="|PROG "+progress;
 		for(GameObject go : gos){
 			out+="|OBJ "+go.toString();
 		}
