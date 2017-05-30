@@ -31,7 +31,10 @@ public class Manager extends Thread{
     }
 	public void startGame(int id){
 		Game g = getGame(id);
-		if(g==null) return;
+		if(g==null){ 
+			System.out.println("null");
+			return;
+		}
 		g.startGame();
 	}
 	public Game createGame(String in){

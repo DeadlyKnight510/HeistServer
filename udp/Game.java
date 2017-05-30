@@ -14,22 +14,8 @@ public class Game {
 	public boolean gameOver=false;
 
 	public int[] progress={0,-1}; //how long player in vault
-	public int maxprog=300;
+	public int maxprog=400;
 	public int currPersProg=-1;
-/*	public void setProgress(int pid, int pg){
-		if(currPersProg != pid){
-			if(pg > progress[0]){
-				currPersProg = pid;
-				progress[0] = pg;
-				System.out.println("1 "+progress[0]+" "+pg);
-			}
-		}
-		else{
-			progress[0] = pg;
-			System.out.println("2 "+progress[0]+" "+pg);
-		}
-	}
-*/
 	public Game(String n){
 		team1 = Collections.synchronizedList(new ArrayList<Player>()); //	robbers
 		team2 = Collections.synchronizedList(new ArrayList<Player>()); // guards
@@ -39,9 +25,10 @@ public class Game {
 		numgames++;
 	}
 	public void startGame(){
-		gameStart=true;
-		ServerUDP.m.updateGames();
 		start();
+		gameStart=true;
+		gameOver=false;
+		ServerUDP.m.updateGames();
 	}
 	public void addGO(Player p, int id, int x, int y, double a){
 		GameObject temp = new GameObject(p.id,id,x,y,a);
@@ -96,6 +83,7 @@ public class Game {
 		for(Player temp1:team1){
 			if(temp1.equals(p)){
 				team1.remove(p);
+				team1.remove(p);
 				p.setGame(null);
 //				Player l = new Player(p.id,p.username);
 //				setXYA(l,p.getX(),p.getY(),p.getA(),-100);
@@ -105,6 +93,7 @@ public class Game {
 		}
 		for(Player temp2:team2){
 			if(temp2.equals(p)){
+				team2.remove(p);
 				team2.remove(p);
 				p.setGame(null);
 //				Player l = new Player(p.id,p.username);
@@ -141,15 +130,6 @@ public class Game {
 	public boolean start(){
 		try{
 			setPlayers();
-			int size = team1.size();
-			if(size==1)
-				maxprog = 600;
-			else if(size < 3)
-				maxprog = 400;
-			else if(size < 5)
-				maxprog = 300;
-			else if(size >=5)
-				maxprog = 200;
 			sendToAll(toString("START"));
 		}catch(Exception e){
 			return false;
@@ -167,6 +147,7 @@ public class Game {
 	public boolean update(){
 		if(gameStart){
 			if(isChanged()){
+				System.out.println("changed upd");
 				sendToAll(toString("UPD"));
 				gos.clear();
 				for(Player p1:team1){
@@ -188,13 +169,12 @@ public class Game {
 				gameOver=true;
 			}
 			progress[0] = getMaxProg();
-			if(teamhealth()){
+			if(teamhealth1()){
 				// DONE [guards won]
 				sendToAll("DONE|2");
 				gameStart=false;
 				gameOver=true;
-			} else if(progress[0]==300){
-				System.out.println("300");
+			} else if(progress[0]==maxprog || teamhealth2()){
 				// DONE [robbers won]
 				sendToAll("DONE|1");
 				gameStart=false;
@@ -203,27 +183,53 @@ public class Game {
 		}
 		return true;
 	}
-	public boolean teamhealth(){
-		for(Player p:team1){
-			if(p.getHealth()>0)
-				return false;
+	public boolean teamhealth1(){
+		synchronized(team1){
+			Iterator<Player> iterator = team1.iterator(); 
+			while (iterator.hasNext()){
+				int h5 = iterator.next().getHealth();
+				if(h5>0)
+					return false;
+			}
+		}
+		return true;
+	}
+	public boolean teamhealth2(){
+		synchronized(team2){
+			Iterator<Player> iterator = team2.iterator(); 
+			while (iterator.hasNext()){
+				int h5 = iterator.next().getHealth();
+				if(h5>0)
+					return false;
+			}
 		}
 		return true;
 	}
 	public boolean isChanged(){
-		for(Player p1:team1){
-			if(p1!=null){
-				if(p1.isChanged())
-					return true;
-			} else
-				System.out.println("null");
+		synchronized(team1){
+			Iterator<Player> iterator = team1.iterator(); 
+			while (iterator.hasNext()){
+				Player p1 = iterator.next();
+				if(p1!=null){
+					if(p1.isChanged())
+						return true;
+				}
+			}
 		}
-		for(Player p2:team2){
-			if(p2.isChanged())
+		synchronized(team2){
+			Iterator<Player> iterator = team2.iterator(); 
+			while (iterator.hasNext()){
+				Player p2 = iterator.next();
+				if(p2!=null){
+					if(p2.isChanged())
+						return true;
+				}
+			}
+		}
+		synchronized(gos){
+			if(gos.size()>0)
 				return true;
 		}
-		if(gos.size()>0)
-			return true;
 		if(progress[0]!=progress[1])
 			return true;
 		return false;
@@ -238,18 +244,21 @@ public class Game {
 				out+="|T1 "+iterator.next().toString();
 			}
 		}
-		for(Player p1:team1){
-			out+="|T1 "+p1.toString();
-		}
-		for(Player p2:team2){
-			out+="|T2 "+p2.toString();
+		synchronized(team2){
+			Iterator<Player> iterator = team2.iterator(); 
+			while (iterator.hasNext()){
+				out+="|T2 "+iterator.next().toString();
+			}
 		}
 		if(beg.trim().equals("START")){
 			out+="|MAXPROG "+maxprog;
 		}
 		out+="|PROG "+progress[0];
-		for(GameObject go : gos){
-			out+="|OBJ "+go.toString();
+		synchronized(gos){
+			Iterator<GameObject> iterator = gos.iterator(); 
+			while (iterator.hasNext()){
+				out+="|OBJ "+iterator.next().toString();
+			}
 		}
 		return out;
 	}

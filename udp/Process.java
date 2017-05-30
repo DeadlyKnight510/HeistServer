@@ -88,6 +88,8 @@ public class Process {
 			String[] temp2 = temp.split(",");
 			ServerUDP.m.playerCancel(id,Integer.parseInt(temp2[2].trim()));
 		}else if(parts[0].trim().equals("KILL")){
+				if(p==null)
+					return;
 			System.out.println("killed");
 			p.getGame().kill(p);
 			ServerUDP.m.endGame(p);
@@ -100,6 +102,8 @@ public class Process {
 				int x1 = Integer.parseInt(parts[2].trim());
 				int y1 = Integer.parseInt(parts[3].trim());
 				double a1 = Double.parseDouble(parts[4].trim());
+				if(p==null)
+					return;
 				if(p.getGame()!=null)
 					p.getGame().addGO(p,idObj,x1,y1,a1); 
 				break;
@@ -107,6 +111,8 @@ public class Process {
 				int x2 = Integer.parseInt(parts[2].trim());
 				int y2 = Integer.parseInt(parts[3].trim());
 				double a2 = Double.parseDouble(parts[4].trim());
+				if(p==null)
+					return;
 				if(p.getGame()!=null){
 					p.getGame().addGO(p,idObj,x2,y2,a2);
 				}
