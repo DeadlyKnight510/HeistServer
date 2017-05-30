@@ -47,7 +47,10 @@ public class Game {
 			Iterator<Player> iterator = team1.iterator(); 
 			while (iterator.hasNext()){
 				Player p = iterator.next();
-				out+="|"+p.id+","+p.username.substring(0,6);
+				if(p.username.length()>8)
+					out+="|"+p.id+","+p.username.substring(0,8)+"...";
+				else
+					out+="|"+p.id+","+p.username;
 			}
 		}
 		return out;
