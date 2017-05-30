@@ -6,12 +6,13 @@ public class Player{
 	public int id;
 	public String username;
 	public Game current=null;
-	public InetAddress address;
+	public InetAddress address=null;
 	public int port;
 	public int[] health=new int[]{100,-1};
 	public int[] x=new int[]{100,-1};
 	public int[] y=new int[]{100,-1};
 	public double[] a=new double[]{0.0,-1.0};
+	public int[] progress = new int[]{0,-1};
 
 	public Player(int id,String user,InetAddress address, int po){
 		this.id = id;
@@ -23,6 +24,11 @@ public class Player{
 		this.id = id;
 		username = user;
 	}
+	public Player(int id,String user,int x, int y, double a , int h){
+		this.id = id;
+		username = user;
+		setXYAH(x,y,a,h);
+	}
 	public Player(int id){
 		this.id = id;
 	}
@@ -30,6 +36,7 @@ public class Player{
 		x[1]=x[0];
 		y[1]=y[0];
 		a[1]=a[0];
+		progress[1]=progress[0];
 		health[1]=health[0];
 	}
 	public void setGame(Game g){
@@ -53,6 +60,11 @@ public class Player{
 	public String toString(){
 		return ""+id+" "+x[0]+" "+y[0]+" "+a[0]+" "+health[0];
 	}
+	public boolean cansend(){
+		if(address==null)
+			return false;
+		return true;
+	}
 	public DatagramPacket getSend(String in){
 		byte[] send = new byte[1024];
 		send = in.getBytes();
@@ -73,10 +85,12 @@ public class Player{
 	public int getHealth(){ return health[0]; }
 	public int getX(){ return x[0]; }
 	public int getY(){ return y[0]; }
+	public int getP(){ return progress[0]; }
 	public double getA(){ return a[0]; }
 	public void setHealth(int x){ health[0]=x; }
 	public void setX(int z){ x[0]=z; }
 	public void setY(int z){ y[0]=z; }
+	public void setP(int z){ progress[0]=z; }
 	public void setA(double z){ a[0]=z; }
 	public void setXYAH(int x, int y, double a, int h){
 		setX(x); setY(y); setA(a); setHealth(h);

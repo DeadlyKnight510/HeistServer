@@ -37,7 +37,8 @@ public class Process {
 			int y=Integer.parseInt(parts[2].trim());
 			double a = Double.parseDouble(parts[3].trim());
 			int h=Integer.parseInt(parts[4].trim());
-			p.setXYAH(x,y,a,h);
+			if(p!=null)
+				p.setXYAH(x,y,a,h);
 		} else if(parts[0].trim().equals("ADD")){
 			String[] temp2 = temp.split(",");
 			// "HLTH 300"
@@ -60,7 +61,8 @@ public class Process {
 		} else if(parts[0].trim().equals("PROG")){
 			// "HLTH 300"
 			int prog=Integer.parseInt(parts[1].trim());
-			ServerUDP.m.containsPlayer(id).progress = prog;
+			p.setP(prog);
+//			ServerUDP.m.containsPlayer(id).setProgress(id,prog);
 		}else if(parts[0].trim().equals("HIT")){
 			// "HLTH 300"
 			int getid=Integer.parseInt(parts[1].trim());
@@ -93,11 +95,23 @@ public class Process {
 			// "BULT 1 15 1352"
 			// if x or y is negative, delete object
 			int idObj = Integer.parseInt(parts[1].trim());
-			int x1 = Integer.parseInt(parts[2].trim());
-			int y1 = Integer.parseInt(parts[3].trim());
-			double a1 = Double.parseDouble(parts[4].trim());
-			if(p.getGame()!=null)
-				p.getGame().addGO(p,idObj,x1,y1,a1); 
+			switch(idObj){
+			case 1:
+				int x1 = Integer.parseInt(parts[2].trim());
+				int y1 = Integer.parseInt(parts[3].trim());
+				double a1 = Double.parseDouble(parts[4].trim());
+				if(p.getGame()!=null)
+					p.getGame().addGO(p,idObj,x1,y1,a1); 
+				break;
+			case 2:
+				int x2 = Integer.parseInt(parts[2].trim());
+				int y2 = Integer.parseInt(parts[3].trim());
+				double a2 = Double.parseDouble(parts[4].trim());
+				if(p.getGame()!=null){
+					p.getGame().addGO(p,idObj,x2,y2,a2);
+				}
+				break;
+			}
 		}
 	}
 }

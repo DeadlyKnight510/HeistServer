@@ -14,21 +14,25 @@ public class Manager extends Thread{
         while(true){
 			synchronized(ongoingGames) {
        			Iterator<Game> iterator = ongoingGames.iterator(); 
+				ArrayList<Integer> nums = new ArrayList<Integer>();
 				while (iterator.hasNext()){
 					Game g = iterator.next();
 					if(g.gameOver){
 						g.update();	
-						removeGame(g.gameid);
+						nums.add(g.gameid);
 					}
+					else
+						g.update();
 				}
+				for(Integer i : nums)
+					removeGame(i.intValue());
 			}
         }
     }
 	public void startGame(int id){
 		Game g = getGame(id);
 		if(g==null) return;
-		g.start();
-		g.gameStart=true;
+		g.startGame();
 	}
 	public Game createGame(String in){
 		Game g = new Game(in);
@@ -100,7 +104,7 @@ public class Manager extends Thread{
         }
         return null;
     }
-    public boolean removePlayerFromGame(Player p){
+    public boolean endGame(Player p){
         Game g = containsPlayer(p);
         if(g==null)
             return false;
@@ -110,13 +114,12 @@ public class Manager extends Thread{
             return true;
         }
     }
-    public boolean endGame(Player p){
+    public boolean removePlayerFromGame(Player p){
         Game g = containsPlayer(p);
         if(g==null)
             return false;
         else{
-            g.end();
-            ongoingGames.remove(g);
+            g.removePlayer(p);
             return true;
         }
     }
