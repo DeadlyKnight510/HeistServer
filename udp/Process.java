@@ -9,7 +9,7 @@ public class Process {
 		//  --> GET
 		//GTID
 		//	--> 5
-		if(line==null||line.equals("")){
+		if(line==null||line.trim().equals("")){
 //			Communicate.send(server,"",dp.getAddress(),dp.getPort());
 		} else if(line.trim().equals("GTID")){
 			String out = "GTID "+Integer.toString(ServerUDP.newID());
@@ -42,7 +42,7 @@ public class Process {
 		} else if(parts[0].trim().equals("ADD")){
 			String[] temp2 = temp.split(",");
 			// "HLTH 300"
-			Game g = ServerUDP.m.createGame(temp2[1].trim());
+			Game g = ServerUDP.m.createGame(id, temp2[1].trim());
 			ServerUDP.c.send(p.getSend("NEWGAMEID|"+g.gameid));
 		} else if(parts[0].trim().equals("REMOVE")){
 			// "HLTH 300"
@@ -50,7 +50,7 @@ public class Process {
 		} else if(parts[0].trim().equals("GTPERS")){
 			// "HLTH 300"
 			String send = ServerUDP.m.getPlayersFromGame(Integer.parseInt(parts[1].trim()));
-			if(send!=null)
+			if(send!=null && p!=null)
 				ServerUDP.c.send(p.getSend(send));
 		} else if(parts[0].trim().equals("STARTGM")){
 			// "HLTH 300"

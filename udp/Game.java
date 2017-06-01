@@ -14,7 +14,7 @@ public class Game {
 	public boolean gameOver=false;
 
 	public int[] progress={0,-1}; //how long player in vault
-	public int maxprog=400;
+	public int maxprog=200;
 	public int currPersProg=-1;
 	public Game(String n){
 		team1 = Collections.synchronizedList(new ArrayList<Player>()); //	robbers
@@ -88,9 +88,7 @@ public class Game {
 				team1.remove(p);
 				team1.remove(p);
 				p.setGame(null);
-//				Player l = new Player(p.id,p.username);
-//				setXYA(l,p.getX(),p.getY(),p.getA(),-100);
-//				team1.add(l);
+				System.out.println("removed");
 				return;
 			}
 		}
@@ -99,13 +97,13 @@ public class Game {
 				team2.remove(p);
 				team2.remove(p);
 				p.setGame(null);
-//				Player l = new Player(p.id,p.username);
-//				setXYA(l,p.getX(),p.getY(),p.getA(),-100);
-//				team1.add(l);
-				sendToAll(getPlayers());
+//				sendToAll(getPlayers());
+				System.out.println("removed");
 				return;
 			}
 		}
+		checkEnd();
+		//game over
 	}
 	public void setXYA(Player p, int x, int y, double a, int h)
 	{
@@ -161,30 +159,41 @@ public class Game {
 				}
 				progress[1]=progress[0];
 			}
-			if(team1.size()==0){
-				sendToAll("DONE|2");
-				gameStart=false;
-				gameOver=true;
-			}
-			if(team2.size()==0){
-				sendToAll("DONE|1");
-				gameStart=false;
-				gameOver=true;
-			}
-			progress[0] = getMaxProg();
-			if(teamhealth1()){
-				// DONE [guards won]
-				sendToAll("DONE|2");
-				gameStart=false;
-				gameOver=true;
-			} else if(progress[0]==maxprog || teamhealth2()){
-				// DONE [robbers won]
-				sendToAll("DONE|1");
-				gameStart=false;
-				gameOver=true;
-			}
+			checkEnd();
 		}
+		if(checkPeople())
+			gameOver=true;
 		return true;
+	}
+	public boolean checkPeople(){
+		if(team1.size()==0 && team2.size()==0){
+			return true;
+		}
+		return false;
+	}
+	public void checkEnd(){
+		if(team1.size()==0){
+			sendToAll("DONE|2");
+			gameStart=false;
+			gameOver=true;
+		}
+		if(team2.size()==0){
+			sendToAll("DONE|1");
+			gameStart=false;
+			gameOver=true;
+		}
+		progress[0] = getMaxProg();
+		if(teamhealth1()){
+			// DONE [guards won]
+			sendToAll("DONE|2");
+			gameStart=false;
+			gameOver=true;
+		} else if(progress[0]==maxprog || teamhealth2()){
+			// DONE [robbers won]
+			sendToAll("DONE|1");
+			gameStart=false;
+			gameOver=true;
+		}
 	}
 	public boolean teamhealth1(){
 		synchronized(team1){

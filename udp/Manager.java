@@ -18,7 +18,8 @@ public class Manager extends Thread{
 				while (iterator.hasNext()){
 					Game g = iterator.next();
 					if(g.gameOver){
-						g.update();	
+						//g.update();	
+						System.out.println("g is over");
 						nums.add(g.gameid);
 					}
 					else
@@ -37,8 +38,10 @@ public class Manager extends Thread{
 		}
 		g.startGame();
 	}
-	public Game createGame(String in){
+	public Game createGame(int id, String in){
 		Game g = new Game(in);
+		removePlayerFromGame(getPlayer(id));
+		g.addPlayer(getPlayer(id));
 		ongoingGames.add(g);
 		updateGames();
 		return g;
@@ -122,6 +125,7 @@ public class Manager extends Thread{
         if(g==null)
             return false;
         else{
+			System.out.println("going in removed");
             g.removePlayer(p);
             return true;
         }
@@ -165,6 +169,8 @@ public class Manager extends Thread{
 	}
 	public void playerPlay(int id,int gid){
 		if(getGame(gid)==null)
+			return;
+		if(getGame(gid).containsPlayer(getPlayer(id)))
 			return;
 		getGame(gid).addPlayer(getPlayer(id));
 		System.out.println("added");
