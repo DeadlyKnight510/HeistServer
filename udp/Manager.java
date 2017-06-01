@@ -5,10 +5,15 @@ import java.util.Collections;
 import java.util.Iterator;
 public class Manager extends Thread{
     public static List<Player> online;
+    public static List<Player> onlineNotInGame;
     public static List<Game> ongoingGames;
+	public double currTime=0.0;
     public Manager(){
+		currTime = System.currentTimeMillis();
         online = Collections.synchronizedList(new ArrayList<Player>());
         ongoingGames = Collections.synchronizedList(new ArrayList<Game>());
+		onlineNotInGame = Collections.synchronizedList(new ArrayList<Player>());
+
     }
     public void run(){
         while(true){
@@ -27,6 +32,15 @@ public class Manager extends Thread{
 				}
 				for(Integer i : nums)
 					removeGame(i.intValue());
+			}
+			synchronized(onlineNotInGame){
+				if(System.currentTimeMillis()-currTime>1000){
+					Iterator<Player> iterator = onlineNotInGame.iterator(); 
+					while (iterator.hasNext()){
+						ServerUDP.c.send(iterator.next().getSend(""));
+					}
+					currTime = System.currentTimeMillis();
+				}
 			}
         }
     }
@@ -84,12 +98,15 @@ public class Manager extends Thread{
 		return true;
 	}
 	public boolean sendToAll(String in){
-		try{
-			for(Player p : online){
-				ServerUDP.c.send(p.getSend(in));	
+		synchronized(online){
+			Iterator<Player> iterator = online.iterator(); 
+			while (iterator.hasNext()){
+				try{
+					ServerUDP.c.send(iterator.next().getSend(in));
+				}catch(Exception e){
+					return false;
+				}
 			}
-		}catch(Exception e){
-			return false;
 		}
 		return true;
 	}
@@ -117,6 +134,7 @@ public class Manager extends Thread{
         else{
             g.end();
             ongoingGames.remove(g);
+			deletePlayerNotInGame(p.id);
             return true;
         }
     }
@@ -150,6 +168,7 @@ public class Manager extends Thread{
 		if(getPlayer(id)!=null){
             removePlayerFromGame(getPlayer(id));
             deletePlayerOnline(id);
+			deletePlayerNotInGame(id);
 			updateGames();
             return;
 		}
@@ -167,6 +186,15 @@ public class Manager extends Thread{
 		}
 		return null;
 	}
+    public boolean deletePlayerNotInGame(int id){
+        for(int x=0;x<onlineNotInGame.size();x++){
+            if(onlineNotInGame.get(x).id==id){
+                onlineNotInGame.remove(x);
+                return true;
+            }
+        }
+        return false;
+    }
 	public void playerPlay(int id,int gid){
 		if(getGame(gid)==null)
 			return;
@@ -174,6 +202,7 @@ public class Manager extends Thread{
 			return;
 		getGame(gid).addPlayer(getPlayer(id));
 		System.out.println("added");
+		deletePlayerNotInGame(id);
 		ServerUDP.c.send(getPlayer(id).getSend(getPlayersFromGame(gid)));
 	}
 	public void playerCancel(int id,int gid){
@@ -181,11 +210,13 @@ public class Manager extends Thread{
 			return;
 		getGame(gid).removePlayer(getPlayer(id));
 		ServerUDP.c.send(getPlayer(id).getSend(getPlayersFromGame(gid)));
+		onlineNotInGame.add(getPlayer(id));
 	}
 	public boolean playerLogOn(int id, String name, InetAddress ad, int port){
         if(id<0 || name==null || ad==null || port<0)
             return false;
 		online.add(new Player(id,name,ad,port));
+		onlineNotInGame.add(getPlayer(id));
 		updateGames();
         return true;
 	}

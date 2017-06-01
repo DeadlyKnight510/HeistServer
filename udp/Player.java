@@ -67,7 +67,8 @@ public class Player{
 	}
 	public DatagramPacket getSend(String in){
 		byte[] send = new byte[1024];
-		send = in.getBytes();
+		if(in!=null)
+			send = in.getBytes();
 		DatagramPacket sendPacket = new DatagramPacket(send, send.length, address, port);
 		return sendPacket;
 	}

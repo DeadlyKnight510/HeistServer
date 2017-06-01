@@ -15,7 +15,7 @@ public class Game {
 
 	public int[] progress={0,-1}; //how long player in vault
 	public int maxprog=200;
-	public int currPersProg=-1;
+//	public int currPersProg=-1;
 	public Game(String n){
 		team1 = Collections.synchronizedList(new ArrayList<Player>()); //	robbers
 		team2 = Collections.synchronizedList(new ArrayList<Player>()); // guards
@@ -23,6 +23,8 @@ public class Game {
 		name=n;
 		gameid=numgames;
 		numgames++;
+		progress[0]=0;
+		progress[1]=-1;
 	}
 	public void startGame(){
 		start();
@@ -86,7 +88,7 @@ public class Game {
 		for(Player temp1:team1){
 			if(temp1.equals(p)){
 				team1.remove(p);
-				team1.remove(p);
+//				team1.remove(p);
 				p.setGame(null);
 				System.out.println("removed");
 				return;
@@ -95,7 +97,7 @@ public class Game {
 		for(Player temp2:team2){
 			if(temp2.equals(p)){
 				team2.remove(p);
-				team2.remove(p);
+//				team2.remove(p);
 				p.setGame(null);
 //				sendToAll(getPlayers());
 				System.out.println("removed");
@@ -174,25 +176,34 @@ public class Game {
 	public void checkEnd(){
 		if(team1.size()==0){
 			sendToAll("DONE|2");
+			sendToAll("DONE|2");
 			gameStart=false;
 			gameOver=true;
+			System.out.println("1");
 		}
-		if(team2.size()==0){
+		else if(team2.size()==0){
+			sendToAll("DONE|1");
 			sendToAll("DONE|1");
 			gameStart=false;
 			gameOver=true;
+			System.out.println("2");
 		}
 		progress[0] = getMaxProg();
 		if(teamhealth1()){
 			// DONE [guards won]
 			sendToAll("DONE|2");
+			sendToAll("DONE|2");
 			gameStart=false;
 			gameOver=true;
+			System.out.println("3");
 		} else if(progress[0]==maxprog || teamhealth2()){
+			System.out.println(progress[0]+" "+maxprog+" "+teamhealth2());
 			// DONE [robbers won]
+			sendToAll("DONE|1");
 			sendToAll("DONE|1");
 			gameStart=false;
 			gameOver=true;
+			System.out.println("4");
 		}
 	}
 	public boolean teamhealth1(){
